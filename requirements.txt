@@ -1,0 +1,20 @@
+# Some of the version defination is just for compatibility on my own system. 
+
+# channels : defaults, r, bioconda
+
+python ==2.7.12
+ipython
+ipython-notebook
+matplotlib
+pandas ==0.18.0
+bowtie2 ==2.2.6
+star
+bedtools ==2.22
+fastx_toolkit ==0.0.14
+matplotlib-venn
+pysam ==0.8.3
+pybedtools
+scikit-learn
+numpy ==1.10.4
+scipy ==0.17.0
+samtools ==1.2
