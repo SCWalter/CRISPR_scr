@@ -17,6 +17,12 @@ setup(
         # And include any *.msg files found in the 'hello' package, too:
         'hello': ['*.msg'],
     },
+    
+    entry_points={
+        'console_scripts': [
+            'crispr-scr = my_package.some_module:main_func',
+        ]
+    }
 
     # metadata for upload to PyPI
     author = "Yunhai Luo",
