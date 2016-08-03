@@ -5,9 +5,11 @@ import argparse
 parser = argparse.ArgumentParser(description='Check the quality (guides representation) of CRISPR library')
 parser.add_argument('integers', metavar='N', type=int, nargs='+',
                     help='an integer for the accumulator')
-parser.add_argument('--sum', dest='accumulate', action='store_const',
-                    const=sum, default=max,
-                    help='sum the integers (default: find the max)')
+parser.add_argument('-i', '--input', help='illumina fastq file(s)')
+parser.add_argument('-a', '--fasta', help='sequences of expected guides. Will be used for making bowtie2 index')
+parser.add_argument('--bt2', help='bowtie2 index for expected guides.')
+parser.add_argument("--1mm", help="allow 1 mismatch during bowtie2 alignment. Default does not all mismatch.",
+                    action="store_true")
 
 args = parser.parse_args()
 print args.accumulate(args.integers)
