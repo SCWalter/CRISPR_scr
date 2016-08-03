@@ -50,8 +50,8 @@ for fastq in args.input:
 		cmd_bt2 = "bowtie2 -p 8 -L 20 -N 0 -x {} {} --un {} -S {} > {} 2>&1".format(bt2index, args.outpath + guideseq, bt2unmap, bt2map, bt2stats)
 	else:
 		cmd_bt2 = "bowtie2 -p 8 -L 20 -N 0 --no-1mm-upfront -x {} {} --un {} -S {} > {} 2>&1".format(bt2index, args.outpath + guideseq, bt2unmap, bt2map, bt2stats)
-	print(cmd)
-	os.system(cmd)
+	print(cmd_bt2)
+	os.system(cmd_bt2)
 	
 	### Count mapped reads from a SAM file
 	cmd = "samtools view -F 260 {} | cut -f 3 | sort | uniq -c | awk '{printf(\"%s\t%s\n\", $2, $1)}' > {}".format(bt2map, gcounts)
