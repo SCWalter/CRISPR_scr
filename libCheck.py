@@ -3,16 +3,14 @@
 import argparse
 
 parser = argparse.ArgumentParser(description='Check the quality (guides representation) of CRISPR library')
-parser.add_argument('integers', metavar='N', type=int, nargs='+',
-                    help='an integer for the accumulator')
-parser.add_argument('-i', '--input', help='illumina fastq file(s)')
-parser.add_argument('-a', '--fasta', help='sequences of expected guides. Will be used for making bowtie2 index')
-parser.add_argument('--bt2', help='bowtie2 index for expected guides.')
-parser.add_argument("--1mm", help="allow 1 mismatch during bowtie2 alignment. Default does not all mismatch.",
-                    action="store_true")
+parser.add_argument('-i', '--input', help='illumina fastq file(s)', required=True)
+bt2index = parser.add_mutually_exclusive_group(required=True)
+bt2index.add_argument('-a', '--fasta', help='sequences of expected guides. Will be used for making bowtie2 index')
+bt2index.add_argument('--bt2', help='bowtie2 index for expected guides.')
+parser.add_argument("--1mm", help="allow 1 mismatch during bowtie2 alignment. Default does not all mismatch.", action="store_true")
+parser.add_argument('-o', '--outpath', help='path to put outputs', required=True)
 
 args = parser.parse_args()
-print args.accumulate(args.integers)
 
 ### Keep base 1 to 50
 ### Keep 100% QS>30
