@@ -1,9 +1,7 @@
 # CRISPR_scr
-=====
-Data analysis scripts related to CRISPR screen
+Data analysis scripts related to CRISPR screen. Currently, it has only one functionality for checking the quality of a CRISPR guides library.
 
 **Table of Contents**
-
 - [Usage](#user-content-usage)
 
 Usage
