@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>CRISPR library check reports</title>
+	<style>
+		p.title {
+			font-size: 2em;
+			text-align: center;
+		}
+		p.subtitle {
+			text-align: center;
+		}
+		h2 { text-align: center; }
+	</style>
+</head>
+<body>
+	<div>
+		<p class="title">CRISPR library check reports {{ date }}</p>
+		<p class="subtitle"> All results are in "{{ mainfolder }}"</p>
+	</div>
+	{% for result in results %}
+		<hr>
+		<div>
+			<h2>{{ result.samplename }}</h2>
+			<p class="subtitle">check folder "{{ result.outfolder }}" for results</p>
+
+			<h3>Summary of Bowtie2 mapping</h3>
+			<p>{{ result.bt2stats }}</p>
+
+			<h3>Summary of duplicates removal</h3>
+			<p>{{ result.picardstats }}</p>
+
+			<h3>Summary of resulting files</h3>
+			<p>Bowtie2 mapping with duplicates removed: {{ result.filenames['sam'] }}</p>
+			<p>Read counts for every detected guides: {{ result.filenames['guidesCt'] }}</p>
+			<p>Counts of detected guides for each gene: {{ result.filenames['guidespergene'] }}</p>
+			<p>List of missed guides (comparing to the initial design): {{ result.filenames['guidemiss'] }}</p>
+			<p>Counts of missed guides (comparing to the initial design) for each gene: {{ result.filenames['misspergene'] }}</p>
+			
+			<h3>Histogram visualization of library quality</h3>
+			<img src="{{ result.figures['numguidespergene'] }}">
+			<p>Figures 1 Histogram for number of guides acquired by each gene in this library.</p>
+			<img src="{{ result.figures['nummisspergene'] }}">
+			<p>Figures 2 Histogram for number of guides missed by each gene comparing to initial design.</p>
+			<img src="{{ result.figures['coverhist'] }}">
+			<p>Figures 3 Histogram for number of reads per detected guide.</p>
+		</div>
+		<hr>
+	{% endfor %}
+</body>
+</html>

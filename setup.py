@@ -9,7 +9,7 @@ setup(
 
     # Project uses reStructuredText, so ensure that the docutils get
     # installed or upgraded on the target machine
-    install_requires = ['docutils>=0.3'],
+    install_requires = ['docutils>=0.3', 'pysam>=0.9.1', 'picard>=2.6.0', 'numpy>=1.11.0', 'pandas', 'matplotlib', 'jinja2'],
 
     package_data = {
         # If any package contains *.txt or *.rst files, include them:
