@@ -1,4 +1,6 @@
-source activate bds_atac
+#!/bin/bash
+
+source activate crispr_scr
 
 python libCheck.py -i sample1.fastq sample2.fastq \
        -t /users/test/CRISPR/Oligos.txt \
