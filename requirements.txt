@@ -2,11 +2,12 @@
 
 # channels : defaults, r, bioconda
 
-python ==2.7.12
-bowtie2 ==2.2.6
-samtools ==1.2
-pysam ==0.8.3
+python ==2.7.12 # No guarantee it will work with python 3; probably not
+bowtie2 ==2.2.6 # For the sake of sharing with my other conda environments; higher version should work (not tested)
+samtools ==1.2 # For the sake of sharing with my other conda environments; higher version should work (not tested)
+pysam ==0.8.3 # For the sake of sharing with my other conda environments; higher version should work (not tested)
 pandas
-numpy ==1.11.0
+numpy ==1.11.0 # auto bins for histogram is new in version 1.11.0
 matplotlib
 jinja2
+picard ==2.5.0 # required for the "BARCODE_TAG" option

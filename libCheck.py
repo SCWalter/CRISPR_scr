@@ -33,7 +33,6 @@ bt2index.add_argument('--bt2', help='Bowtie2 index for expected guides.', defaul
 parser.add_argument('-r', '--randomer', help='Basepair position for randomer, which will be used to remove PCR duplicates. Support both discrete and continuous regions. Discrete regions are separated by ",", and continuous region is expressed as "a:b".', default=None)
 parser.add_argument('-g', '--guide', help='Basepair position for 20bp CRISPR guide. Support both discrete and continuous regions. Discrete regions are separated by ",", and continuous region is expressed as "a:b".', default=None)
 parser.add_argument('-o', '--outpath', help='Path to put outputs (with slash). Default is the same directory as the first input fastq.', default='')
-parser.add_argument('--picard', help='Path to "picard.jar"', required=True)
 
 args = parser.parse_args()
 logging.basicConfig(filename='CRISPR_lib_Check.log',level=logging.DEBUG)
@@ -109,10 +108,10 @@ for fastq in args.input:
 	### Attach barcodes to the BT&QT tags of samfile and remove duplicates using picard
 	logging.info('Removing duplicates with picard')
 	yltk.attach_barcode(bt2map, bt2map_bc)
-	picardsort = "java -jar {} SortSam I={} O={} SORT_ORDER=queryname".format(args.picard, bt2map_bc, bt2map_bc_sorted)
+	picardsort = "java -Xmx2g -jar $PICARD SortSam I={} O={} SORT_ORDER=queryname".format(bt2map_bc, bt2map_bc_sorted)
 	logging.info(picardsort)
 	os.system(picardsort)
-	dedup = "java -jar {} MarkDuplicates I={} O={} M={} BARCODE_TAG=BC REMOVE_DUPLICATES=True".format(args.picard, bt2map_bc_sorted, bt2map_dedup, dedup_stats)
+	dedup = "java -Xmx2g -jar $PICARD MarkDuplicates I={} O={} M={} BARCODE_TAG=BC REMOVE_DUPLICATES=True".format(bt2map_bc_sorted, bt2map_dedup, dedup_stats)
 	logging.info(dedup + '\n')
 	os.system(dedup)
 	
