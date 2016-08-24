@@ -218,7 +218,7 @@ for fastq in args.input:
 
 ### Report all library checking results using jinja2 templating system
 logging.info('Making the final aggregated HTML report')
-reporttemp = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath="./")).get_template('report_template.html')
+reporttemp = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=os.path.dirname(os.path.abspath(__file__)))).get_template('report_template.html')
 with open(os.path.join(resultsum, 'Report.html'), 'w') as reporthtml:
 	reporthtml.write(reporttemp.render(date=str(datetime.datetime.today().date()), mainfolder = maindir, results=libResults))
 logging.info('Please find your results and the aggregated report at {}'.format(maindir))
