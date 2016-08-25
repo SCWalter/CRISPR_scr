@@ -44,6 +44,7 @@ if not args.bt2:
 	bt2indexdir = os.path.join(guidetab_dir, 'bowtie2index')
 	os.system("mkdir -p {}".format(bt2indexdir))
 	bt2index = os.path.join(bt2indexdir, guidetab_base)
+	bt2indexlog = os.path.join(bt2indexdir, "{}_build.log".format(guidetab_base))
 	fasta = os.path.join(bt2indexdir, guidetab_base + ".fasta")
 
 	tab2fasta = "tail -n +2 {} | awk -F'\\t' '{{print \">\"$1\":\"$2\"\\n\"$3}}' > {}".format(guidetab_abspath, fasta)
@@ -51,9 +52,10 @@ if not args.bt2:
 	logging.info(tab2fasta + '\n')
 	os.system(tab2fasta)
 
-	bt2build = "bowtie2-build {} {}".format(fasta, bt2index)
+	bt2build = "bowtie2-build {} {} > {}".format(fasta, bt2index, bt2indexlog)
 	logging.info('Making Bowtie2 index from fasta file')
 	logging.info(bt2build + '\n')
+	logging.info('Check {} for progress and stats.'.format(bt2indexlog))
 	os.system(bt2build)
 else: bt2index = args.bt2
 
@@ -83,8 +85,10 @@ for fastq in args.input:
 	bt2stats = os.path.join(outdir, name.replace(".fastq", "_bt2stats.txt"))
 	bt2map_bc = os.path.join(outtemp, name.replace(".fastq", "_bc.sam"))
 	bt2map_bc_sorted = os.path.join(outtemp, name.replace(".fastq", "_bc_qnsorted.sam"))
+	bt2map_samsort_log = os.path.join(outtemp, name.replace(".fastq", "_bc_qnsorted.log"))
 	bt2map_dedup = os.path.join(outdir, name.replace(".fastq", "_qnsorted_dedup.sam"))
 	dedup_stats = os.path.join(outdir, name.replace(".fastq", "_picard_dedup.txt"))
+	dedup_log = os.path.join(temp, name.replace(".fastq", "_picard_dedup.log"))
 	gcounts = os.path.join(outdir, name.replace(".fastq", "_counts.txt"))
 	obsguides = os.path.join(outtemp, name.replace(".fastq", "_observedG.txt"))
 	ctbygene = os.path.join(outdir, name.replace(".fastq", "_countsbygene.txt"))
@@ -108,11 +112,13 @@ for fastq in args.input:
 	### Attach barcodes to the BT&QT tags of samfile and remove duplicates using picard
 	logging.info('Removing duplicates with picard')
 	yltk.attach_barcode(bt2map, bt2map_bc)
-	picardsort = "java -Xmx2g -jar $PICARD SortSam I={} O={} SORT_ORDER=queryname".format(bt2map_bc, bt2map_bc_sorted)
+	picardsort = "java -Xmx2g -jar $PICARD SortSam I={} O={} SORT_ORDER=queryname > {}".format(bt2map_bc, bt2map_bc_sorted, bt2map_samsort_log)
 	logging.info(picardsort)
+	logging.info('Check {} for progress if this process is slow.'.format(bt2map_samsort_log))
 	os.system(picardsort)
-	dedup = "java -Xmx2g -jar $PICARD MarkDuplicates I={} O={} M={} BARCODE_TAG=BC REMOVE_DUPLICATES=True".format(bt2map_bc_sorted, bt2map_dedup, dedup_stats)
+	dedup = "java -Xmx2g -jar $PICARD MarkDuplicates I={} O={} M={} BARCODE_TAG=BC REMOVE_DUPLICATES=True > {}".format(bt2map_bc_sorted, bt2map_dedup, dedup_stats, dedup_log)
 	logging.info(dedup + '\n')
+	logging.info('Check {} for progress if this process is slow.'.format(dedup_log))
 	os.system(dedup)
 	
 	### Count mapped reads from a SAM file
