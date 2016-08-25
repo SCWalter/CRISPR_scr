@@ -35,7 +35,16 @@ parser.add_argument('-g', '--guide', help='Basepair position for 20bp CRISPR gui
 parser.add_argument('-o', '--outpath', help='Path to put outputs (with slash). Default is the same directory as the first input fastq.', default='')
 
 args = parser.parse_args()
-logging.basicConfig(filename='CRISPR_guide_counts.log',level=logging.DEBUG)
+if not args.outpath:
+	maindir = os.path.join(os.path.dirname(os.path.abspath(args.input[0])), 'CRISPR_guideCounts')
+else:
+	maindir = os.path.join(args.outpath, 'CRISPR_guideCounts')
+os.system("mkdir -p {}".format(maindir))
+resultsum = os.path.join(maindir, 'View_Result_Summary')
+os.system("mkdir -p {}".format(resultsum))
+mainlog = os.path.join(os.path.dirname(maindir), 'CRISPR_guide_counts.log')
+logging.basicConfig(filename=mainlog,level=logging.DEBUG)
+os.system('echo "Please go to {} check for runlog and results."'.format(os.path.dirname(maindir)) )
 
 if not args.bt2:
 	guidetab_abspath = os.path.abspath(args.table)
@@ -59,13 +68,6 @@ if not args.bt2:
 	os.system(bt2build)
 else: bt2index = args.bt2
 
-if not args.outpath:
-	maindir = os.path.join(os.path.dirname(os.path.abspath(args.input[0])), 'CRISPR_guideCounts')
-else:
-	maindir = os.path.join(args.outpath, 'CRISPR_guideCounts')
-os.system("mkdir -p {}".format(maindir))
-resultsum = os.path.join(maindir, 'View_Result_Summary')
-os.system("mkdir -p {}".format(resultsum))
 libResults = []
 samplecount = 0
 
