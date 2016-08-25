@@ -33,6 +33,7 @@ bt2index.add_argument('--bt2', help='Bowtie2 index for expected guides.', defaul
 parser.add_argument('-r', '--randomer', help='Basepair position for randomer, which will be used to remove PCR duplicates. Support both discrete and continuous regions. Discrete regions are separated by ",", and continuous region is expressed as "a:b".', default=None)
 parser.add_argument('-g', '--guide', help='Basepair position for 20bp CRISPR guide. Support both discrete and continuous regions. Discrete regions are separated by ",", and continuous region is expressed as "a:b".', default=None)
 parser.add_argument('-o', '--outpath', help='Path to put outputs (with slash). Default is the same directory as the first input fastq.', default='')
+parser.add_argument('-p', '--thread', help='Number of parallel search threads for bowtie2 alignment. Default is 8.', default=8)
 
 args = parser.parse_args()
 if not args.outpath:
@@ -106,7 +107,7 @@ for fastq in args.input:
 	yltk.process_fastq(fastq, bc_bp = args.randomer, slice_bp = args.guide, output = guideseq)
 	
 	### Align to expected guides
-	noMMalign = "bowtie2 -p 8 -L 20 -N 0 --no-1mm-upfront -x {} {} --un {} -S {} > {} 2>&1".format(bt2index, guideseq, bt2unmap, bt2map, bt2stats)
+	noMMalign = "bowtie2 -p {} -L 20 -N 0 --no-1mm-upfront -x {} {} --un {} -S {} > {} 2>&1".format(args.thread, bt2index, guideseq, bt2unmap, bt2map, bt2stats)
 	logging.info('Bowtie2 alignment')
 	logging.info(noMMalign + '\n')
 	os.system(noMMalign)
