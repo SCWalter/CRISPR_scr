@@ -167,23 +167,31 @@ for fastq in args.input:
 	plt.cla()
 
 	### Figures 3 histogram for # of reads per guide
-	readist = pd.read_table(gcounts, header=None).iloc[:,1].values
-	totalreads = readist.sum()
-	totalguides = readist.size
-	avgRpG = totalreads/totalguides
+	readhist = pd.read_table(gcounts, header=None).iloc[:,1].values
+	avgRpG = readhist.sum()/readhist.size
+	histuniqvalues, histvaluecounts = np.unique(readhist,return_counts=True)
+	if histuniqvalues.size <= 10:
+		barx = np.arange(histuniqvalues.size)
+		plt.bar(barx, histvaluecounts, width=1)
+		plt.xticks(barx+0.5, histuniqvalues)
+		plt.xlabel('reads per guide (real counts)')
+	else:
+		plt.hist(readhist, bins='auto')
+		plt.xlabel('reads per guide (auto bins)')
+	
+	readhist = pd.read_table(gcounts, header=None).iloc[:,1].values
+	avgRpG = readhist.sum()/readhist.size
 	try:
-		plt.hist(readist, bins='auto')
+		plt.hist(readhist, bins='auto')
 		plt.xlabel('reads per guide (auto bins)')
 	except:
 		logging.debug('Auto bins for figure 3 not available. Needs newer "matplotlib".')
-		plt.hist(readist, bins=60)
+		plt.hist(readhist, bins=60)
 		plt.xlabel('reads per guide (60 bins)')
+
 	plt.axvline(x=avgRpG, color='r')
 	plt.ylabel('# of guides (having certain reads per guide)')
 	plt.title('Guide coverage distribution of the library')
-#	plt.annotate('Average reads per guide giving even distribution', xy=(totalreads/totalguides, ?))
-#	plt.annotate('Something', (0,0), (0, -20), xycoords='axes fraction', textcoords='offset points', va='top')
-#	plt.text(0.1,0.1,'Something')
 	plt.savefig(coverfig, format='png')
 	
 	plt.clf()
