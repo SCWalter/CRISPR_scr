@@ -32,7 +32,7 @@ bt2index.add_argument('-t', '--table', help='Table with guide infomation, which 
 bt2index.add_argument('--bt2', help='Bowtie2 index for expected guides. This option is not accepted if a table with guide designs was provided through the "-t/--table" option.', default=None)
 parser.add_argument('-r', '--randomer', help='Basepair position for randomer, which will be used to remove PCR duplicates. Support both discrete and continuous regions. Discrete regions are separated by ",", and continuous region is expressed as "a:b".', default=None)
 parser.add_argument('-g', '--guide', help='Basepair position for 20bp CRISPR guide. Support both discrete and continuous regions. Discrete regions are separated by ",", and continuous region is expressed as "a:b".', default=None)
-parser.add_argument('-o', '--outpath', help='Path to put outputs (with slash). Default is the same directory as the first input fastq.', default='')
+parser.add_argument('-o', '--outpath', help='Path to put outputs. Default is the same directory as the first input fastq.', default='')
 parser.add_argument('-p', '--thread', help='Number of parallel search threads for bowtie2 alignment. Default is 8.', default=8)
 
 args = parser.parse_args()
