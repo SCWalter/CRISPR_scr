@@ -169,6 +169,7 @@ for fastq in args.input:
 	### Figures 3 histogram for # of reads per guide
 	readhist = pd.read_table(gcounts, header=None).iloc[:,1].values
 	avgRpG = readhist.sum()/readhist.size
+	# If unique values of reads per guide are only a few (<=10), use bar graph to show all real data instead of histogram
 	histuniqvalues, histvaluecounts = np.unique(readhist,return_counts=True)
 	if histuniqvalues.size <= 10:
 		barx = np.arange(histuniqvalues.size)
