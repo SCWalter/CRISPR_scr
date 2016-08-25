@@ -52,7 +52,7 @@ if not args.bt2:
 	logging.info(tab2fasta + '\n')
 	os.system(tab2fasta)
 
-	bt2build = "bowtie2-build {} {} > {}".format(fasta, bt2index, bt2indexlog)
+	bt2build = "bowtie2-build {} {} 1>{} 2>&1".format(fasta, bt2index, bt2indexlog)
 	logging.info('Making Bowtie2 index from fasta file')
 	logging.info(bt2build + '\n')
 	logging.info('Check {} for progress and stats.'.format(bt2indexlog))
@@ -112,11 +112,11 @@ for fastq in args.input:
 	### Attach barcodes to the BT&QT tags of samfile and remove duplicates using picard
 	logging.info('Removing duplicates with picard')
 	yltk.attach_barcode(bt2map, bt2map_bc)
-	picardsort = "java -Xmx2g -jar $PICARD SortSam I={} O={} SORT_ORDER=queryname > {}".format(bt2map_bc, bt2map_bc_sorted, bt2map_samsort_log)
+	picardsort = "java -Xmx2g -jar $PICARD SortSam I={} O={} SORT_ORDER=queryname 2>{}".format(bt2map_bc, bt2map_bc_sorted, bt2map_samsort_log)
 	logging.info(picardsort)
 	logging.info('Check {} for progress if this process is slow.'.format(bt2map_samsort_log))
 	os.system(picardsort)
-	dedup = "java -Xmx2g -jar $PICARD MarkDuplicates I={} O={} M={} BARCODE_TAG=BC REMOVE_DUPLICATES=True > {}".format(bt2map_bc_sorted, bt2map_dedup, dedup_stats, dedup_log)
+	dedup = "java -Xmx2g -jar $PICARD MarkDuplicates I={} O={} M={} BARCODE_TAG=BC REMOVE_DUPLICATES=True 2>{}".format(bt2map_bc_sorted, bt2map_dedup, dedup_stats, dedup_log)
 	logging.info(dedup + '\n')
 	logging.info('Check {} for progress if this process is slow.'.format(dedup_log))
 	os.system(dedup)
