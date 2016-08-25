@@ -6,4 +6,4 @@ Data analysis scripts related to CRISPR screen. Currently, it has only one funct
 
 Usage
 -----
-`libCheck.py [-h] -i INPUT [INPUT ...] (-t TABLE | --bt2 BT2) [-r RANDOMER] [-g GUIDE] [-o OUTPATH]`
+`usage: guideCount.py [-h] -i INPUT [INPUT ...] (-t TABLE | --bt2 BT2) [-r RANDOMER] [-g GUIDE] [-o OUTPATH] [-p THREAD]`
