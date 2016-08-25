@@ -178,17 +178,6 @@ for fastq in args.input:
 	else:
 		plt.hist(readhist, bins='auto')
 		plt.xlabel('reads per guide (auto bins)')
-	
-	readhist = pd.read_table(gcounts, header=None).iloc[:,1].values
-	avgRpG = readhist.sum()/readhist.size
-	try:
-		plt.hist(readhist, bins='auto')
-		plt.xlabel('reads per guide (auto bins)')
-	except:
-		logging.debug('Auto bins for figure 3 not available. Needs newer "matplotlib".')
-		plt.hist(readhist, bins=60)
-		plt.xlabel('reads per guide (60 bins)')
-
 	plt.axvline(x=avgRpG, color='r')
 	plt.ylabel('# of guides (having certain reads per guide)')
 	plt.title('Guide coverage distribution of the library')
