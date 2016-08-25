@@ -88,7 +88,7 @@ for fastq in args.input:
 	bt2map_samsort_log = os.path.join(outtemp, name.replace(".fastq", "_bc_qnsorted.log"))
 	bt2map_dedup = os.path.join(outdir, name.replace(".fastq", "_qnsorted_dedup.sam"))
 	dedup_stats = os.path.join(outdir, name.replace(".fastq", "_picard_dedup.txt"))
-	dedup_log = os.path.join(temp, name.replace(".fastq", "_picard_dedup.log"))
+	dedup_log = os.path.join(outtemp, name.replace(".fastq", "_picard_dedup.log"))
 	gcounts = os.path.join(outdir, name.replace(".fastq", "_counts.txt"))
 	obsguides = os.path.join(outtemp, name.replace(".fastq", "_observedG.txt"))
 	ctbygene = os.path.join(outdir, name.replace(".fastq", "_countsbygene.txt"))
