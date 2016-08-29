@@ -11,7 +11,7 @@ python $DIR/../../yltkv2.py process_fastq \
        -b 1:5,12:17 \
        -s 18: \
        -i 6:11 \
-       --outfastq AAGCTA,CGTGAT,GCGGAC:$DIR/sample1.fastq;ACATCG,CTGATC,CACTGT:$DIR/sample2.fastq
+       -o AAGCTA,CGTGAT,GCGGAC:$DIR/sample1.fastq\;ACATCG,CTGATC,CACTGT:$DIR/sample2.fastq
 
 source deactivate
 
