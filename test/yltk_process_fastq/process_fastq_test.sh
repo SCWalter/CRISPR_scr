@@ -8,7 +8,7 @@ source activate crispr_scr
 
 python $DIR/../../yltkv2.py process_fastq \
        -f $DIR/process_fastq_test.fastq \
-       -b 1:5,12:17
+       -b 1:5,12:17 \
        -s 18: \
        -i 6:11 \
        --outfastq AAGCTA,CGTGAT,GCGGAC:$DIR/sample1.fastq;ACATCG,CTGATC,CACTGT:$DIR/sample2.fastq
