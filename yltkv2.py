@@ -29,6 +29,7 @@ import argparse
 import itertools
 import pysam
 
+
 def fastq_reads(fastq):
     """Get reads from fastq file.
 
@@ -63,6 +64,7 @@ def fastq_reads(fastq):
                 break
             else:
                 yield read
+
 
 def multi_idcs(idcs_str):
     """Convert a string input to indices used by the multi_slices function.
@@ -112,6 +114,7 @@ def multi_idcs(idcs_str):
             idcs.append((int(idx_str)-1, int(idx_str)))
     return idcs
 
+
 def multi_slices(seq, idcs):
     """Slice out multiple substrings and concatenate them as a new single string
 
@@ -128,6 +131,7 @@ def multi_slices(seq, idcs):
 
     sublist = [seq[i:j] for (i, j) in idcs]
     return ''.join(sublist)
+
 
 def _seqmatch(query, ref, query_allow_n=False):
     """Check if DNA sequences in "query" and "ref" match
@@ -164,6 +168,7 @@ def _seqmatch(query, ref, query_allow_n=False):
             else:
                 return False
     return True
+
 
 def _demux_dict(output):
     """Convert a string to a index to file dictionary used by the "fastq_write"
@@ -204,6 +209,7 @@ def _demux_dict(output):
             idx_file_dict[idx] = file
     return idx_file_dict
 
+
 def _fastq_write(read, nonindex_file, read_index=None, index_file_dict=None):
     """Write reads into target fastq file(s)
 
@@ -243,6 +249,7 @@ def _fastq_write(read, nonindex_file, read_index=None, index_file_dict=None):
                 break
     read.append('') # Add the last line break
     output_fastq.write('\n'.join(read))
+
 
 def process_fastq(fastq, bc_bp=None, slice_bp=None, index_bp=None, output=None):
     """Process fastq file
@@ -321,6 +328,7 @@ def process_fastq(fastq, bc_bp=None, slice_bp=None, index_bp=None, output=None):
         for file in set(output_dict.values()):
             file.close()
 
+
 def attach_barcode(sam, output):
     """Attach molecular barcodes (randomers) to the BC&QT tag in the sam file.
 
@@ -349,6 +357,7 @@ def attach_barcode(sam, output):
         outfile.write(read)
     outfile.close()
     infile.close()
+
 
 def main():
     """Use the main() function to test major functions of this toolkit:
@@ -433,5 +442,7 @@ def main():
         parser.print_help()
         exit(1)
 
+
 if __name__ == '__main__':
     main()
+
