@@ -6,7 +6,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source activate crispr_scr
 
-python $DIR/../../guidescountv2.py -i $DIR/test1.fastq $DIR/test2.fastq \
+python $DIR/../../guidescount.py -i $DIR/test1.fastq $DIR/test2.fastq \
        -t $DIR/Table_Guides.txt \
        -r 1:9 \
        -g 31:50 \
