@@ -12,7 +12,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import jinja2
 
-import yltkv2 as yltk
+import yltk
 
 
 class CRISPRLibSeqQC:
