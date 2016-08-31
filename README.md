@@ -22,7 +22,21 @@ This pipeline contains pre-processing steps for NGS results from a CRISPR screen
 ##Outputs
 ###Files
 Files are named by replacing ".fastq" postfix of the fastq input with corresponding postfix. They are under "OUTPATH/CRISPR\_guideCounts/sample#"
+Postfix|Description
+"\_bt2stats.txt"|Mapping statistic from bowtie2
+"\_qnsorted\_dedup.sam"|The mapping result with PCR duplicates removed (using randomer).
+"\_picard\_dedup.txt"|Statistic for removing PCR duplicates (using randomer) from picard.
+"\_counts.txt"|A table containing reads count for each guide (only detected guide; in other words, guides with read count 0 are not included). This is used by the "\_coverage.png" figure.
+"\_countsbygene.txt"|A table counting detected guides for each gene. Genes which miss all their guides (guide count=0) are not included. This is used by the "\_guidespergene.png" figure.
+"\_missG.txt"|A list of guides which are not detected in the fastq result.
+"\_missbygene.txt"|A table counting number of guides missed by each gene in the fastq result, in comparing to the initial design. This is used by the "\_missguidespergene.png" figure.
+
 ###Figures
 Figures are named by replacing ".fastq" postfix of the fastq input with corresponding postfix. Figures for all fastq inputs are under "OUTPATH/CRISPR\_guideCounts/View\_Result\_Summary"
+Postfix|Description
+"\_guidespergene.png" figure|A bar graph summarizing number of guides each gene get in the fastq result.
+"\_missguidespergene.png"|A bar graph summarizing number of guides missed by each gene in the fastq result, in comparing to the initial design.
+"\_coverage.png"|A histogram summarizing the amount of reads each guide has represented in the fastq result. It will be degenerated to a bar graph if the variety for reads per guide is small (less than 10 possible states).
+
 ###A HTML report
 Reports for all fastq inputs will be in one single HTML file under "OUTPATH/CRISPR\_guideCounts/View\_Result\_Summary". Reports for different fastq inputs will be separated by horizontal bars. Within each report, there are bowtie2 statistic, picard duplicates removal statistic, a map to locate outputs, and the 3 figures described above.
