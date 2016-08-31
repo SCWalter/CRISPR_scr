@@ -7,7 +7,7 @@ Data analysis scripts related to CRISPR screen. Currently, it has only one funct
 ##Usage
 `usage: guidescount.py [-h] -i INPUT [INPUT ...] (-t TABLE | --bt2 BT2) [-r RANDOMER] [-g GUIDE] [-o OUTPATH] [-p THREAD]`
 ###Arguments
-Name|Help message
+   Name   |Help message
 ---|---
 -i|Illumina fastq file(s). Support multi-file input. An individual result folder and report will be generated for each fastq input.
 -t, --table|Table with designed/expected guide infomation, which will be used for making bowtie2 index in the same directory as this table. The table should have 3 columns: 1) Gene name; 2) Guides name/number; 3) Guide sequence. The first row will be discarded as header which then followed by one guides per row. A fake header is required if there is no header yet. If a Bowtie2 index has already been built before, you can provide it through the "--bt2" option. This option will not be accepted if a Bowtie2 index is provided by the "--bt2" option. An error will be raised if both "-t" and "--bt2" options are provided (mutual exclusion).
