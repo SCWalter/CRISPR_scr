@@ -1,4 +1,130 @@
 #!/usr/bin/env python
+#
+# Copyright (c) 2016 Yunhai Luo
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+""" This script should be used a pipeline rather than a module for analyzing NGS
+    results from a CRISPR screen experiment.
+
+    This pipeline contains pre-processing steps for NGS results from a CRISPR
+    screen experiment. With a input of the initial design of the CRISPR library,
+    it will provide a table for each fastq input, listing all guides detected in
+    NGS and listing number of reads read out for each detected guide. It can
+    also point out which guides are not detected (missing) in each specific
+    fastq. These results should be considered as preliminary results and should
+    be further analyzed by statistical analysis and comparison.
+
+    Inputs:
+        -i INPUT [INPUT ...], --input INPUT [INPUT ...]
+            Illumina fastq file(s). Support multi-file input. An individual
+            result folder and report will be generated for each fastq input.
+        -t TABLE, --table TABLE
+            Table with designed/expected guide infomation,which will be used for
+            making bowtie2 index in the same directory as this table. The table
+            should have 3 columns: 1) Gene name; 2) Guides name/number; 3)Guide
+            sequence. The first row will be discarded as header which then
+            followed by one guides per row. A fake header is required if there
+            is no header yet. If a Bowtie2 index has already been built before,
+            you can provide it through the "--bt2" option. This option will not
+            be accepted if a Bowtie2 index is provided by the "--bt2" option. An
+            error will be raised if both "-t" and "--bt2" options are provided
+            (mutual exclusion).
+        --bt2 BT2
+            Bowtie2 index for expected guides in CRISPR library design. If
+            provided, this index will be used even "--table" option is also
+            provided. In other words, the "--bt2" option is preferred over
+            "--table" option. In fact, though, an error will be raised if both
+            "-t" and "--bt2" options are provided (mutual exclusion).
+        -r RANDOMER, --randomer RANDOMER
+            Basepair position for randomer, which will be used to remove PCR
+            duplicates. Support both discrete and continuous regions. Discrete
+            regions are separated by ",", and continuous region is expressed as
+            "a:b". For example: "1:9,31:50" stands for a sequence combining
+            nucleotides from position 1 to position 9 with nucleotides from
+            position 31 to position 50.
+        -g GUIDE, --guide GUIDE
+            Basepair position for 20bp CRISPR guide. As explain above
+            ("--randomer" option), this option also supports both discrete and
+            continuous regions. Discrete regions are separated by ",", and
+            continuous region is expressed as "a:b".
+        -o OUTPATH, --outpath OUTPATH
+            Path to put outputs. A single folder named "CRISPR_guideCounts" will
+            be created in this path. Each fastq input will have a corresponding
+            result folder under the "CRISPR_guideCounts" folder. One other
+            folder named "View_Result_Summary" will also be created under the
+            "CRISPR_guideCounts" folder. It has the HTML report from this
+            pipeline. Check "Outputs" below for details. Default is the same
+            directory as the first input fastq.
+        -p THREAD, --thread THREAD
+            Number of parallel search threads for bowtie2 alignment. Default is
+            8. This option is the same as the "-p" option for bowtie2 and will
+            be used directly in bowtie2. Check bowtie2 documentation for
+            details.
+
+    Outputs (for each fastq input):
+        Files (files are named by replacing ".fastq" postfix of the fastq input
+        with corresponding postfix. They are under
+        "OUTPATH/CRISPR_guideCounts/sample#"):
+            "_bt2stats.txt": mapping statistic from bowtie2
+            "_qnsorted_dedup.sam": the mapping result with PCR duplicates
+                                   removed (using randomer).
+            "_picard_dedup.txt": statistic for removing PCR duplicates (using
+                                 randomer) from picard.
+            "_counts.txt": a table containing reads count for each guide (only
+                           detected guide; in other words, guides with read
+                           count 0 are not included). This is used by the
+                           "_coverage.png" figure.
+            "_countsbygene.txt": a table counting detected guides for each gene.
+                                 Genes which miss all their guides (guide
+                                 count=0) are not included. This is used by the
+                                 "_guidespergene.png" figure.
+            "_missG.txt": a list of guides which are not detected in the fastq
+                          result.
+            "_missbygene.txt": a table counting number of guides missed by each
+                               gene in the fastq result, in comparing to the
+                               initial design. This is used by the
+                               "_missguidespergene.png" figure.
+
+        Figures (figures are named by replacing ".fastq" postfix of the fastq
+        input with corresponding postfix. Figures for all fastq inputs are under
+        "OUTPATH/CRISPR_guideCounts/View_Result_Summary"):
+            "_guidespergene.png" figure: a bar graph summarizing number of
+                guides each gene get in the fastq result.
+            "_missguidespergene.png": a bar graph summarizing number of guides
+                missed by each gene in the fastq result, in comparing to the
+                initial design.
+            "_coverage.png": a histogram summarizing the amount of reads each
+                guide has represented in the fastq result. It will be
+                degenerated to a bar graph if the variety for reads per guide is
+                small (less than 10 possible states).
+
+        A HTML report: reports for all fastq inputs will be in one single HTML
+                       file under
+                       "OUTPATH/CRISPR_guideCounts/View_Result_Summary". Reports
+                       for different fastq inputs will be separated by
+                       horizontal bars. Within each report, there are bowtie2
+                       statistic, picard duplicates removal statistic, a map
+                       to locate outputs, and the 3 figures described above.
+ """
+# pylint cannot infer pandas' read_table function. Line 413, 427, 442
+# pylint cannot infer jinja2 template's render function. Line 505
+# pylint: disable=no-member
 
 import argparse
 import os
@@ -61,43 +187,70 @@ def main():
     parser = argparse.ArgumentParser(description='Count number of reads'
                                                  'sequenced for each guide in a'
                                                  'CRISPR screen library.')
-    parser.add_argument('-i', '--input', help='Illumina fastq file(s)',
+    parser.add_argument('-i', '--input',
+                        help='Illumina fastq file(s) Support multi-file input.'
+                             'An individual result folder and report will be'
+                             'generated for each fastq input.',
                         nargs='+', required=True)
     bt2index = parser.add_mutually_exclusive_group(required=True)
     bt2index.add_argument('-t', '--table',
-                          help='Table with designed/expected guide infomation,'
-                          'which will be used for making bowtie2 index in the'
-                          'same directory as this table. The table should have'
-                          '3 columns: 1) Gene name; 2) Guides name/number; 3)'
-                          'Guide sequence. The first row will be discarded as'
-                          'header which then followed by one guides per row. A'
-                          'fake header is required if there is no header yet.'
-                          'If a Bowtie2 index has already been built before,'
-                          'you can provide it through the "--bt2" option. This'
-                          'option will not be accepted if a Bowtie2 index is'
-                          'provided by the "--bt2" option.', default=None)
+                          help='Table with designed/expected guide infomation, '
+                               'which will be used for making bowtie2 index in '
+                               'the same directory as this table. The table '
+                               'should have 3 columns: 1) Gene name; 2) Guides '
+                               'name/number; 3) Guide sequence. The first row '
+                               'will be discarded as header which then followed'
+                               ' by one guides per row. A fake header is '
+                               'required if there is no header yet. If a '
+                               'Bowtie2 index has already been built before, '
+                               'you can provide it through the "--bt2" option. '
+                               'This option will not be accepted if a Bowtie2 '
+                               'index is provided by the "--bt2" option. An '
+                               'error will be raised if both "-t" and "--bt2" '
+                               'options are provided (mutual exclusion).',
+                          default=None)
     bt2index.add_argument('--bt2',
-                          help='Bowtie2 index for expected guides. This option'
-                               'is not accepted if a table with guide designs'
-                               'was provided through the "-t/--table" option.',
+                          help='Bowtie2 index for expected guides in CRISPR '
+                               'library design. If provided, this index will be'
+                               ' used even "--table" option is also provided. '
+                               'In other words, the "--bt2" option is preferred'
+                               ' over "--table" option. In fact, though, an '
+                               'error will be raised if both "-t" and "--bt2" '
+                               'options are provided (mutual exclusion).',
                           default=None)
     parser.add_argument('-r', '--randomer',
-                        help='Basepair position for randomer, which will be'
-                             'used to remove PCR duplicates. Support both'
+                        help='Basepair position for randomer, which will be '
+                             'used to remove PCR duplicates. Support both '
                              'discrete and continuous regions. Discrete regions'
-                             'are separated by ",", and continuous region is'
-                             'expressed as "a:b".', default=None)
+                             ' are separated by ",", and continuous region is '
+                             'expressed as "a:b". For example: "1:9,31:50" '
+                             'stands for a sequence combining nucleotides from '
+                             'position 1 to position 9 with nucleotides from '
+                             'position 31 to position 50.', default=None)
     parser.add_argument('-g', '--guide',
-                        help='Basepair position for 20bp CRISPR guide. Support'
-                             'both discrete and continuous regions. Discrete'
-                             'regions are separated by ",", and continuous'
-                             'region is expressed as "a:b".', default=None)
+                        help='Basepair position for 20bp CRISPR guide. As '
+                             'explain above ("--randomer" option), this option '
+                             'also supports both discrete and continuous '
+                             'regions. Discrete regions are separated by ",", '
+                             'and continuous region is expressed as "a:b".',
+                        default=None)
     parser.add_argument('-o', '--outpath',
-                        help='Path to put outputs. Default is the same'
+                        help='Path to put outputs. A single folder named '
+                             '"CRISPR_guideCounts" will be created in this '
+                             'path. Each fastq input will have a corresponding '
+                             'result folder under the "CRISPR_guideCounts" '
+                             'folder. One other folder named '
+                             '"View_Result_Summary" will also be created under '
+                             'the "CRISPR_guideCounts" folder. It has the HTML '
+                             'report from this pipeline. Check pipeline '
+                             'documentation for details. Default is the same '
                              'directory as the first input fastq.', default='')
     parser.add_argument('-p', '--thread',
-                        help='Number of parallel search threads for bowtie2'
-                             'alignment. Default is 8.', default=8)
+                        help='Number of parallel search threads for bowtie2 '
+                             'alignment. Default is 8. This option is the same '
+                             'as the "-p" option for bowtie2 and will be used '
+                             'directly in bowtie2. Check bowtie2 documentation '
+                             'for details.', default=8)
 
     args = parser.parse_args()
     if not args.outpath:
@@ -152,13 +305,13 @@ def main():
         logging.info('Start to process %s', name)
         logging.info('--------------------------------------------------------')
 
+        # Temporary files
         guideseq = os.path.join(outtemp,
                                 name.replace('.fastq',
                                              '_processed_guides.fastq'))
         bt2unmap = os.path.join(outtemp,
                                 name.replace('.fastq', '_unmapped.fastq'))
         bt2map = os.path.join(outtemp, name.replace('.fastq', '_mapped.sam'))
-        bt2stats = os.path.join(outdir, name.replace('.fastq', '_bt2stats.txt'))
         bt2map_bc = os.path.join(outtemp, name.replace('.fastq', '_bc.sam'))
         bt2map_bc_sorted = os.path.join(outtemp,
                                         name.replace('.fastq',
@@ -166,20 +319,23 @@ def main():
         bt2map_samsort_log = os.path.join(outtemp,
                                           name.replace('.fastq',
                                                        '_bc_qnsorted.log'))
+        dedup_log = os.path.join(outtemp,
+                                 name.replace('.fastq', '_picard_dedup.log'))
+        obsguides = os.path.join(outtemp,
+                                 name.replace('.fastq', '_observedG.txt'))
+        expguides = os.path.join(outtemp,
+                                 name.replace('.fastq', '_expectedG.txt'))
+
+        # Result files
+        bt2stats = os.path.join(outdir, name.replace('.fastq', '_bt2stats.txt'))
         bt2map_dedup = os.path.join(outdir,
                                     name.replace('.fastq',
                                                  '_qnsorted_dedup.sam'))
         dedup_stats = os.path.join(outdir,
                                    name.replace('.fastq', '_picard_dedup.txt'))
-        dedup_log = os.path.join(outtemp,
-                                 name.replace('.fastq', '_picard_dedup.log'))
         gcounts = os.path.join(outdir, name.replace('.fastq', '_counts.txt'))
-        obsguides = os.path.join(outtemp,
-                                 name.replace('.fastq', '_observedG.txt'))
         ctbygene = os.path.join(outdir,
                                 name.replace('.fastq', '_countsbygene.txt'))
-        expguides = os.path.join(outtemp,
-                                 name.replace('.fastq', '_expectedG.txt'))
         missguides = os.path.join(outdir, name.replace('.fastq', '_missG.txt'))
         missbygene = os.path.join(outdir,
                                   name.replace('.fastq', '_missbygene.txt'))
