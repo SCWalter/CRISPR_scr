@@ -3,6 +3,7 @@ This pipeline contains pre-processing steps for NGS results from a CRISPR screen
 
 **Table of Contents**
 - [Usage](#user-content-usage)
+- [Outputs](#user-content-outputs)
 
 ##Usage
 `guidescount.py [-h] -i INPUT [INPUT ...] (-t TABLE | --bt2 BT2) [-r RANDOMER] [-g GUIDE] [-o OUTPATH] [-p THREAD]`
@@ -17,3 +18,11 @@ This pipeline contains pre-processing steps for NGS results from a CRISPR screen
 -o, --outpath|Path to put outputs. A single folder named "CRISPR\_guideCounts" will be created in this path. Each fastq input will have a corresponding result folder under the "CRISPR\_guideCounts" folder. One other folder named "View\_Result\_Summary" will also be created under the "CRISPR_guideCounts" folder. It has the HTML report from this pipeline. Check "Outputs" below for details. Default is the same directory as the first input fastq.
 -p, --thread|Number of parallel search threads for bowtie2 alignment. Default is 8. This option is the same as the "-p" option for bowtie2 and will be used directly in bowtie2. Check bowtie2 documentation for details.
 -h, --help|show this help message and exit
+
+##Outputs
+###Files
+Files are named by replacing ".fastq" postfix of the fastq input with corresponding postfix. They are under "OUTPATH/CRISPR\_guideCounts/sample#"
+###Figures
+Figures are named by replacing ".fastq" postfix of the fastq input with corresponding postfix. Figures for all fastq inputs are under "OUTPATH/CRISPR\_guideCounts/View\_Result\_Summary"
+###A HTML report
+Reports for all fastq inputs will be in one single HTML file under "OUTPATH/CRISPR\_guideCounts/View\_Result\_Summary". Reports for different fastq inputs will be separated by horizontal bars. Within each report, there are bowtie2 statistic, picard duplicates removal statistic, a map to locate outputs, and the 3 figures described above.
