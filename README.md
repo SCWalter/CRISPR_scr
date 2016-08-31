@@ -23,6 +23,7 @@ This pipeline contains pre-processing steps for NGS results from a CRISPR screen
 ###Files
 Files are named by replacing ".fastq" postfix of the fastq input with corresponding postfix. They are under "OUTPATH/CRISPR\_guideCounts/sample#"
 Postfix|Description
+---|---
 "\_bt2stats.txt"|Mapping statistic from bowtie2
 "\_qnsorted\_dedup.sam"|The mapping result with PCR duplicates removed (using randomer).
 "\_picard\_dedup.txt"|Statistic for removing PCR duplicates (using randomer) from picard.
@@ -34,6 +35,7 @@ Postfix|Description
 ###Figures
 Figures are named by replacing ".fastq" postfix of the fastq input with corresponding postfix. Figures for all fastq inputs are under "OUTPATH/CRISPR\_guideCounts/View\_Result\_Summary"
 Postfix|Description
+---|---
 "\_guidespergene.png" figure|A bar graph summarizing number of guides each gene get in the fastq result.
 "\_missguidespergene.png"|A bar graph summarizing number of guides missed by each gene in the fastq result, in comparing to the initial design.
 "\_coverage.png"|A histogram summarizing the amount of reads each guide has represented in the fastq result. It will be degenerated to a bar graph if the variety for reads per guide is small (less than 10 possible states).
