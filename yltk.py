@@ -96,7 +96,7 @@ def multi_idcs(idcs_str):
         [(0,9), (30,50)]
 
         It stands for a string from index 0 to index 8 together with a string
-        from index 31 to index 49 (all zero based index). Check the multi_slices
+        from index 30 to index 49 (all zero based index). Check the multi_slices
         function for other details.
     """
 
@@ -427,10 +427,10 @@ def main():
                                     '"process_fastq" sub-command for details.',
                                required=True)
     parser_attach.add_argument('-o', '--outsam',
-                                help='Output unsorted sam file. Default is to '
-                                     'add a "_bcs" postfix and save in the same'
-                                     ' directory.',
-                                default=None)
+                               help='Output unsorted sam file. Default is to '
+                                    'add a "_bcs" postfix and save in the same'
+                                    ' directory.',
+                               default=None)
 
     args = parser.parse_args()
     if args.subcom == 'process_fastq':
