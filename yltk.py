@@ -407,9 +407,9 @@ def main():
                                      'output, the default is to add a "_proced"'
                                      ' postfix and save in the same directory. '
                                      'For demultiplexing, the expected format '
-                                     'is "filename1:index1-1,index1-2,'
-                                     'index1-3,...;filename2:index2-1,index2-2,'
-                                     'index2-3,...;...". No space is allowed. '
+                                     'is "index1-1,index1-2,index1-3,...:'
+                                     'filename1;index2-1,index2-2,index2-3,...:'
+                                     'filename2;...". No space is allowed. '
                                      '"N" is supported in indexes but not '
                                      'sequencing results',
                                 default=None)
