@@ -1,23 +1,24 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2016 Yunhai Luo
+# Copyright (c) 2017 Yunhai Luo
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy of
-# this software and associated documentation files (the "Software"), to deal in
-# the Software without restriction, including without limitation the rights to
-# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-# the Software, and to permit persons to whom the Software is furnished to do so,
-# subject to the following conditions:
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies ofthe Software, and to permit persons to whom the Software is furnished
+# to do so, subject to the following conditions:
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 """ This script should be used a pipeline rather than a module for analyzing NGS
     results from a CRISPR screen experiment.
@@ -139,6 +140,8 @@ import matplotlib.pyplot as plt
 import jinja2
 
 import yltk
+import yl_fastq_tools
+import yl_sam_tools
 
 
 class CRISPRLibSeqQC:
@@ -253,20 +256,24 @@ def main():
                              'for details.', default=8)
 
     args = parser.parse_args()
+    
+    # Setup output directory
     if not args.outpath:
-        maindir = os.path.join(os.path.dirname(os.path.abspath(args.input[0])),
+        main_dir = os.path.join(os.path.dirname(os.path.abspath(args.input[0])),
                                'CRISPR_guideCounts')
     else:
-        maindir = os.path.join(args.outpath, 'CRISPR_guideCounts')
-    os.system('mkdir -p {}'.format(maindir))
-    resultsum = os.path.join(maindir, 'View_Result_Summary')
-    os.system('mkdir -p {}'.format(resultsum))
-    mainlog = os.path.join(os.path.dirname(maindir), 'CRISPR_guide_counts.log')
-    logging.basicConfig(filename=mainlog, level=logging.DEBUG)
-    os.system('echo "Please go to {} check for runlog and results."'
-              .format(os.path.dirname(maindir)))
+        main_dir = os.path.join(args.outpath, 'CRISPR_guideCounts')
+    os.system('mkdir -p {}'.format(main_dir))
+    result_sum = os.path.join(main_dir, 'View_Result_Summary')
+    os.system('mkdir -p {}'.format(result_sum))
+    main_log = os.path.join(os.path.dirname(main_dir), 'CRISPR_guide_counts.log')
+    logging.basicConfig(filename=main_log, level=logging.DEBUG)
+    os.system('echo "Please go to {} for runlog and results."'
+              .format(os.path.dirname(main_dir)))
 
+    # Build bowtie2 index if not provided
     if not args.bt2:
+        # Setup bowtie2 index output directory
         guidetab_abspath = os.path.abspath(args.table)
         guidetab_dir = os.path.dirname(guidetab_abspath)
         guidetab_base = os.path.basename(guidetab_abspath)
@@ -276,14 +283,14 @@ def main():
         bt2indexlog = os.path.join(bt2indexdir, '{}_build.log'
                                    .format(guidetab_base))
         fasta = os.path.join(bt2indexdir, guidetab_base + ".fasta")
-
+        # Generate fasta from guide table
         tab2fasta = ('tail -n +2 {} | '
                      'awk -F\'\\t\' \'{{print ">"$1":"$2"\\n"$3}}\' '
                      '> {}'.format(guidetab_abspath, fasta))
         logging.info('Generating fasta from the table of guides')
         logging.info(tab2fasta + '\n')
         os.system(tab2fasta)
-
+        # Build bowtie2 index
         bt2build = ('bowtie2-build {} {} 1>{} 2>&1'
                     .format(fasta, bt2index, bt2indexlog))
         logging.info('Making Bowtie2 index from fasta file')
@@ -297,14 +304,13 @@ def main():
 
     for fastq in args.input:
         samplecount += 1
-        outdir = os.path.join(maindir, 'sample{}'.format(samplecount))
+        outdir = os.path.join(main_dir, 'sample{}'.format(samplecount))
         os.system('mkdir -p {}'.format(outdir))
         outtemp = os.path.join(outdir, 'temp')
         os.system('mkdir -p {}'.format(outtemp))
         name = os.path.basename(fastq)
         logging.info('Start to process %s', name)
         logging.info('--------------------------------------------------------')
-
         # Temporary files
         guideseq = os.path.join(outtemp,
                                 name.replace('.fastq',
@@ -325,7 +331,6 @@ def main():
                                  name.replace('.fastq', '_observedG.txt'))
         expguides = os.path.join(outtemp,
                                  name.replace('.fastq', '_expectedG.txt'))
-
         # Result files
         bt2stats = os.path.join(outdir, name.replace('.fastq', '_bt2stats.txt'))
         bt2map_dedup = os.path.join(outdir,
@@ -339,20 +344,24 @@ def main():
         missguides = os.path.join(outdir, name.replace('.fastq', '_missG.txt'))
         missbygene = os.path.join(outdir,
                                   name.replace('.fastq', '_missbygene.txt'))
-        ggfig = os.path.join(resultsum,
+        ggfig = os.path.join(result_sum,
                              name.replace('.fastq', '_guidespergene.png'))
-        mggfig = os.path.join(resultsum,
+        mggfig = os.path.join(result_sum,
                               name.replace('.fastq', '_missguidespergene.png'))
-        coverfig = os.path.join(resultsum,
+        coverfig = os.path.join(result_sum,
                                 name.replace('.fastq', '_coverage.png'))
 
         # Extract molecular barcode (randomer) to name; Will be used by picard
         # for removing duplicates in sam file
         logging.info('Pre-processing fastq')
-        yltk.process_fastq(fastq,
-                           bc_bp=args.randomer,
-                           slice_bp=args.guide,
-                           output=guideseq)
+        yl_fastq_tools.process_fastq(fastq, 
+                                     seq_idx=args.guide, 
+                                     rand_idx=args.randomer, 
+                                     default_output=guideseq)
+        #yltk.process_fastq(fastq,
+        #                   bc_bp=args.randomer,
+        #                   slice_bp=args.guide,
+        #                   output=guideseq)
 
         # Align to expected guides
         bt2align = ('bowtie2 -p {} '
@@ -372,7 +381,8 @@ def main():
         # Attach barcodes to the BT&QT tags of samfile and remove duplicates
         # using picard
         logging.info('Removing duplicates with picard')
-        yltk.attach_barcode(bt2map, bt2map_bc)
+        yl_sam_tools.attach_barcode(bt2map, bt2map_bc)
+        #yltk.attach_barcode(bt2map, bt2map_bc)
         picardsort = ('java -Xmx2g -jar $PICARD SortSam '
                       'I={} '
                       'O={} '
@@ -508,7 +518,7 @@ def main():
         # using jinja2 templating system
         logging.info('Saving and organizing results for final presentations in '
                      'HTML\n')
-        libqc = CRISPRLibSeqQC(name, os.path.relpath(outdir, maindir))
+        libqc = CRISPRLibSeqQC(name, os.path.relpath(outdir, main_dir))
         with open(bt2stats, 'r') as bt2statsfile:
             libqc.bt2stats = (bt2statsfile.read().replace('\n', '<br>')
                               .replace(' ', '&nbsp;'))
@@ -529,9 +539,9 @@ def main():
         libqc.filenames['guidespergene'] = os.path.relpath(ctbygene, outdir)
         libqc.filenames['guidemiss'] = os.path.relpath(missguides, outdir)
         libqc.filenames['misspergene'] = os.path.relpath(missbygene, outdir)
-        libqc.figures['numguidespergene'] = os.path.relpath(ggfig, resultsum)
-        libqc.figures['nummisspergene'] = os.path.relpath(mggfig, resultsum)
-        libqc.figures['coverhist'] = os.path.relpath(coverfig, resultsum)
+        libqc.figures['numguidespergene'] = os.path.relpath(ggfig, result_sum)
+        libqc.figures['nummisspergene'] = os.path.relpath(mggfig, result_sum)
+        libqc.figures['coverhist'] = os.path.relpath(coverfig, result_sum)
         lib_results.append(libqc)
 
         logging.info('%s analysis finished', name)
@@ -543,13 +553,13 @@ def main():
     shenshe2_loader = jinja2.FileSystemLoader(searchpath=shenshe2_searchpath)
     shenshe2_env = jinja2.Environment(loader=shenshe2_loader)
     reporttemp = shenshe2_env.get_template('report_template.html')
-    with open(os.path.join(resultsum, 'Report.html'), 'w') as reporthtml:
+    with open(os.path.join(result_sum, 'Report.html'), 'w') as reporthtml:
         current_date = str(datetime.datetime.today().date())
         reporthtml.write(reporttemp.render(date=current_date,
-                                           mainfolder=maindir,
+                                           mainfolder=main_dir,
                                            results=lib_results))
     logging.info('Please find your results and the aggregated report at %s',
-                 maindir)
+                 main_dir)
     logging.info('CRISPR guide counting finished!')
 
 
