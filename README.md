@@ -5,9 +5,9 @@ This pipeline contains pre-processing steps for NGS results from a CRISPR screen
 - [Usage](#user-content-usage)
 - [Outputs](#user-content-outputs)
 
-##Usage
+## Usage
 `guidescount.py [-h] -i INPUT [INPUT ...] (-t TABLE | --bt2 BT2) [-r RANDOMER] [-g GUIDE] [-o OUTPATH] [-p THREAD]`
-###Arguments
+### Arguments
 &nbsp;&nbsp;&nbsp;Argument&nbsp;&nbsp;&nbsp;|Help message
 ---|---
 -i|Illumina fastq file(s). Support multi-file input. An individual result folder and report will be generated for each fastq input.
@@ -19,8 +19,8 @@ This pipeline contains pre-processing steps for NGS results from a CRISPR screen
 -p, --thread|Number of parallel search threads for bowtie2 alignment. Default is 8. This option is the same as the "-p" option for bowtie2 and will be used directly in bowtie2. Check bowtie2 documentation for details.
 -h, --help|show this help message and exit
 
-##Outputs
-###Files
+## Outputs
+### Files
 Files are named by replacing ".fastq" postfix of the fastq input with corresponding postfix. They are under "OUTPATH/CRISPR\_guideCounts/sample#"
 
 Postfix|Description
@@ -33,7 +33,7 @@ Postfix|Description
 "\_missG.txt"|A list of guides which are not detected in the fastq result.
 "\_missbygene.txt"|A table counting number of guides missed by each gene in the fastq result, in comparing to the initial design. This is used by the "\_missguidespergene.png" figure.
 
-###Figures
+### Figures
 Figures are named by replacing ".fastq" postfix of the fastq input with corresponding postfix. Figures for all fastq inputs are under "OUTPATH/CRISPR\_guideCounts/View\_Result\_Summary"
 
 Postfix|Description
@@ -42,5 +42,5 @@ Postfix|Description
 "\_missguidespergene.png"|A bar graph summarizing number of guides missed by each gene in the fastq result, in comparing to the initial design.
 "\_coverage.png"|A histogram summarizing the amount of reads each guide has represented in the fastq result. It will be degenerated to a bar graph if the variety for reads per guide is small (less than 10 possible states).
 
-###A HTML report
+### A HTML report
 Reports for all fastq inputs will be in one single HTML file under "OUTPATH/CRISPR\_guideCounts/View\_Result\_Summary". Reports for different fastq inputs will be separated by horizontal bars. Within each report, there are bowtie2 statistic, picard duplicates removal statistic, a map to locate outputs, and the 3 figures described above.
