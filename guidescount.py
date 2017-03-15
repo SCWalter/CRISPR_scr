@@ -139,7 +139,6 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import jinja2
 
-import yltk
 import yl_fastq_tools
 import yl_sam_tools
 
@@ -358,10 +357,6 @@ def main():
                                      seq_idx=args.guide, 
                                      rand_idx=args.randomer, 
                                      default_output=guideseq)
-        #yltk.process_fastq(fastq,
-        #                   bc_bp=args.randomer,
-        #                   slice_bp=args.guide,
-        #                   output=guideseq)
 
         # Align to expected guides
         bt2align = ('bowtie2 -p {} '
@@ -382,7 +377,6 @@ def main():
         # using picard
         logging.info('Removing duplicates with picard')
         yl_sam_tools.attach_barcode(bt2map, bt2map_bc)
-        #yltk.attach_barcode(bt2map, bt2map_bc)
         picardsort = ('java -Xmx2g -jar $PICARD SortSam '
                       'I={} '
                       'O={} '
